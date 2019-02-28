@@ -11,3 +11,24 @@ I created this repository to publish my changes and keep track of issues.
 The original file is copyright © 2009-2014 by Christopher Suckling. I
 attempted to reach him at the email address published in the file but
 did not get a reply.
+
+** Changes in this fork
+
++ Added support for including Exchange calendars
+
++ Added ~org-mac-iCal-import-exchange~ go enable or disable Exchange calendars.
+
+  In principle, Exchange calendars are supported, but there are
+  clearly issues with time zones and the way Exchange handles
+  repeating/duplicated/declined events.
+
+  Sometimes the Exchange .ics file contains several events with the
+  same UID. Sometimes they have different SEQUENCE numbers. It's
+  unclear how these are supposed to be handled. At present, they
+  sometimes occur multiple times in the diary.
+
++ Updated the code that attempts to determine if a calendar is “checked” by
+  reading the ~Info.plist~ so that it handles a missing plist file correctly.
+
++ The ~sw_vers~ regex has been updated so that it will accept versions of
+  MacOS after 10.8.
