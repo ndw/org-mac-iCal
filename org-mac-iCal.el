@@ -40,17 +40,17 @@
 ;; grouped with their parent event
 ;;
 ;; (add-hook 'org-agenda-cleanup-fancy-diary-hook
-;; 	  (lambda ()
-;; 	    (goto-char (point-min))
-;; 	    (save-excursion
-;; 	      (while (re-search-forward "^[a-z]" nil t)
-;; 		(goto-char (match-beginning 0))
-;; 		(insert "0:00-24:00 ")))
-;; 	    (while (re-search-forward "^ [a-z]" nil t)
-;; 	      (goto-char (match-beginning 0))
-;; 	      (save-excursion
-;; 		(re-search-backward "^[0-9]+:[0-9]+-[0-9]+:[0-9]+ " nil t))
-;; 	      (insert (match-string 0)))))
+;;        (lambda ()
+;;          (goto-char (point-min))
+;;          (save-excursion
+;;            (while (re-search-forward "^[a-z]" nil t)
+;;              (goto-char (match-beginning 0))
+;;              (insert "0:00-24:00 ")))
+;;          (while (re-search-forward "^ [a-z]" nil t)
+;;            (goto-char (match-beginning 0))
+;;            (save-excursion
+;;              (re-search-backward "^[0-9]+:[0-9]+-[0-9]+:[0-9]+ " nil t))
+;;            (insert (match-string 0)))))
 
 ;;; Code:
 
@@ -91,9 +91,9 @@ the the Emacs diary"
 
   ;; parse each calendar's Info.plist to see if calendar is checked in iCal
   (setq all-calendars (delq 'nil (mapcar
-				    (lambda (x)
-				      (omi-checked x))
-				    all-calendars)))
+                                    (lambda (x)
+                                      (omi-checked x))
+                                    all-calendars)))
 
   ;; for each calendar, concatenate individual events into a single ics file
   (with-temp-buffer
@@ -137,9 +137,9 @@ individual event files into a single ics file"
      (setq omi-leopard-events (directory-files (concat x "/Events") 1 ".*ics$"))
      (with-temp-buffer
        (mapc
-	(lambda (y)
-	  (insert-file-contents (expand-file-name y)))
-	omi-leopard-events)
+        (lambda (y)
+          (insert-file-contents (expand-file-name y)))
+        omi-leopard-events)
        (write-region (point-min) (point-max) (concat (expand-file-name x) ".ics"))))
    list))
 
@@ -151,57 +151,57 @@ date range so that Emacs calendar view doesn't grind to a halt"
     (insert-file-contents string)
     (goto-char (point-min))
     (while
-	(re-search-forward "^BEGIN:VCALENDAR$" nil t)
+        (re-search-forward "^BEGIN:VCALENDAR$" nil t)
       (setq startEntry (match-beginning 0))
       (re-search-forward "^END:VCALENDAR$" nil t)
       (setq endEntry (match-end 0))
       (save-restriction
-	(narrow-to-region startEntry endEntry)
-	(goto-char (point-min))
-	(re-search-forward "\\(^DTSTART;.*:\\)\\([0-9][0-9][0-9][0-9]\\)\\([0-9][0-9]\\)" nil t)
-	(if (or (eq (match-string 2) nil) (eq (match-string 3) nil))
-	    (progn
-	      (setq yearEntry 1)
-	      (setq monthEntry 1))
-	  (setq yearEntry (string-to-number (match-string 2)))
-	  (setq monthEntry (string-to-number (match-string 3))))
-	(setq year (string-to-number (format-time-string "%Y")))
-	(setq month (string-to-number (format-time-string "%m")))
+        (narrow-to-region startEntry endEntry)
+        (goto-char (point-min))
+        (re-search-forward "\\(^DTSTART;.*:\\)\\([0-9][0-9][0-9][0-9]\\)\\([0-9][0-9]\\)" nil t)
+        (if (or (eq (match-string 2) nil) (eq (match-string 3) nil))
+            (progn
+              (setq yearEntry 1)
+              (setq monthEntry 1))
+          (setq yearEntry (string-to-number (match-string 2)))
+          (setq monthEntry (string-to-number (match-string 3))))
+        (setq year (string-to-number (format-time-string "%Y")))
+        (setq month (string-to-number (format-time-string "%m")))
         (setq now (list month 1 year))
         (setq entryDate (list monthEntry 1 yearEntry))
         ;; Check to see if this is a repeating event
         (goto-char (point-min))
         (setq isRepeating (re-search-forward "^RRULE:" nil t))
-	;; Delete if outside range and not repeating
+        ;; Delete if outside range and not repeating
         (when (and
                (not isRepeating)
                (> (abs (- (calendar-absolute-from-gregorian now)
                           (calendar-absolute-from-gregorian entryDate)))
                   (* (/ org-mac-iCal-range 2) 30))
-	  (delete-region startEntry endEntry)))
+          (delete-region startEntry endEntry)))
           (goto-char (point-max))))
     (while
-	(re-search-forward "^END:VEVENT$" nil t)
+        (re-search-forward "^END:VEVENT$" nil t)
       (delete-blank-lines))
     (goto-line 1)
     (insert "BEGIN:VCALENDAR\n\n")
     (goto-line 2)
     (while
-	(re-search-forward "^BEGIN:VCALENDAR$" nil t)
+        (re-search-forward "^BEGIN:VCALENDAR$" nil t)
       (replace-match "\n"))
     (goto-line 2)
     (while
-	(re-search-forward "^END:VCALENDAR$" nil t)
+        (re-search-forward "^END:VCALENDAR$" nil t)
       (replace-match "\n"))
     (insert "END:VCALENDAR")
     (goto-line 1)
     (delete-blank-lines)
     (while
-	(re-search-forward "^END:VEVENT$" nil t)
+        (re-search-forward "^END:VEVENT$" nil t)
       (delete-blank-lines))
     (goto-line 1)
     (while
-	(re-search-forward "^ORG.*" nil t)
+        (re-search-forward "^ORG.*" nil t)
       (replace-match "\n"))
     (goto-line 1)
     (write-region (point-min) (point-max) string))
@@ -212,14 +212,14 @@ date range so that Emacs calendar view doesn't grind to a halt"
   (mapc
    (lambda (x)
      (if (string-match "^diary" x)
-	 (kill-buffer x)))
+         (kill-buffer x)))
    list))
 
 (defun omi-kill-ics-buffer (list)
   (mapc
    (lambda (x)
      (if (string-match "ics$" x)
-	 (kill-buffer x)))
+         (kill-buffer x)))
    list))
 
 (defun omi-delete-ics-file (list)
@@ -233,15 +233,15 @@ date range so that Emacs calendar view doesn't grind to a halt"
 whether Checked key is 1. If Checked key is not 1, remove
 calendar from list of calendars for import"
   (let* ((root (xml-parse-file (car (directory-files directory 1 "Info.plist"))))
-	 (plist (car root))
-	 (dict (car (xml-get-children plist 'dict)))
-	 (keys (cdr (xml-node-children dict)))
-	 (keys (mapcar
-		(lambda (x)
-		  (cond ((listp x)
-			 x)))
-		keys))
-	 (keys (delq 'nil keys)))
+         (plist (car root))
+         (dict (car (xml-get-children plist 'dict)))
+         (keys (cdr (xml-node-children dict)))
+         (keys (mapcar
+                (lambda (x)
+                  (cond ((listp x)
+                         x)))
+                keys))
+         (keys (delq 'nil keys)))
     (when (equal "1" (car (cddr (lax-plist-get keys '(key nil "Checked")))))
       directory)))
 
