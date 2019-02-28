@@ -10,6 +10,7 @@
 ;; ndw edited the sw_vers regex to make it work with 10.10+
 ;; ndw extended to support exchange calendars
 ;; ndw edited omi-checked to handle the possibility of missing Info.plist files
+;; ndw added a flag to enable/disable importing Exchange calendars
 ;; ********************************************************************************
 
 ;; This file is not part of GNU Emacs.
@@ -68,6 +69,18 @@ today's date"
   :group 'org-time
   :type 'integer)
 
+(defcustom org-mac-iCal-import-exchange nil
+  "Import Exchange calendars? In principle, Exchange calendars are
+supported, but there are clearly issues with time zones and the way
+Exchange handles repeating/duplicated/declined events.
+
+Sometimes the Exchange .ics file contains several events with the
+same UID. Sometimes they have different SEQUENCE numbers. It's
+unclear how these are supposed to be handled. At present, they
+sometimes occur multiple times in the diary."
+  :group 'org-time
+  :type 'boolean)
+
 (defun org-mac-iCal ()
   "Selects checked calendars in iCal.app and imports them into
 the the Emacs diary"
@@ -92,10 +105,11 @@ the the Emacs diary"
 
   (setq exchange-folders (directory-files "~/Library/Calendars" 1 ".*exchange$"))
   (setq exchange-calendars nil)
-  (mapc
-     (lambda (x)
-       (setq exchange-calendars (nconc exchange-calendars (directory-files x 1 ".*calendar$"))))
-     exchange-folders)
+  (if org-mac-iCal-import-exchange
+      (mapc
+       (lambda (x)
+         (setq exchange-calendars (nconc exchange-calendars (directory-files x 1 ".*calendar$"))))
+       exchange-folders))
 
   (setq local-calendars nil)
   (setq local-calendars (directory-files "~/Library/Calendars" 1 ".*calendar$"))
