@@ -11,6 +11,7 @@
 ;; ndw extended to support exchange calendars
 ;; ndw edited omi-checked to handle the possibility of missing Info.plist files
 ;; ndw added a flag to enable/disable importing Exchange calendars
+;; ndw added a list of calendar names as an alternative to Checked
 ;; ********************************************************************************
 
 ;; This file is not part of GNU Emacs.
@@ -80,6 +81,14 @@ unclear how these are supposed to be handled. At present, they
 sometimes occur multiple times in the diary."
   :group 'org-time
   :type 'boolean)
+
+(defcustom org-mac-iCal-calendar-names nil
+  "A list of named calendars. If the calendar name list is not empty,
+only calendars with titles that match one of the specified names
+will be imported. On MacOS 10.14, the Checked property in the
+calendar plist file does not seem to be reliable."
+  :group 'org-time
+  :type '(repeat string))
 
 (defun org-mac-iCal ()
   "Selects checked calendars in iCal.app and imports them into
@@ -257,8 +266,10 @@ date range so that Emacs calendar view doesn't grind to a halt"
 
 (defun omi-checked (directory)
   "Parse Info.plist in iCal.app calendar folder and determine
-whether Checked key is 1. If Checked key is not 1, remove
-calendar from list of calendars for import"
+whether to include the calendar or not. If
+org-mac-iCal-calendar-names is nil, then the calendar is included
+if Checked key is 1. If the names list is not nil, the calendar
+is included only if it has a matching name."
   (let ((filename (car (directory-files directory 1 "Info.plist"))))
     (if filename
         (let* ((root (xml-parse-file filename))
@@ -270,8 +281,12 @@ calendar from list of calendars for import"
                         (cond ((listp x)
                                x)))
                       keys))
-               (keys (delq 'nil keys)))
-          (when (equal "1" (car (cddr (lax-plist-get keys '(key nil "Checked")))))
+               (keys (delq 'nil keys))
+               (checked (car (cddr (lax-plist-get keys '(key nil "Checked")))))
+               (title (car (cddr (lax-plist-get keys '(key nil "Title"))))))
+          (when (or
+                 (and (eq org-mac-iCal-calendar-names nil) (equal "1" checked))
+                 (member title org-mac-iCal-calendar-names))
             directory))
       nil)))
 
