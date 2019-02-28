@@ -6,6 +6,12 @@
 ;; Version: 0.1057.104
 ;; Keywords: outlines, calendar
 
+;; ********************************************************************************
+;; ndw edited the sw_vers regex to make it work with 10.10+
+;; ndw extended to support exchange calendars
+;; ndw edited omi-checked to handle the possibility of missing Info.plist files
+;; ********************************************************************************
+
 ;; This file is not part of GNU Emacs.
 
 ;; This program is Free Software; you can redistribute it and/or modify
@@ -84,10 +90,17 @@ the the Emacs diary"
        (setq caldav-calendars (nconc caldav-calendars (directory-files x 1 ".*calendar$"))))
      caldav-folders)
 
+  (setq exchange-folders (directory-files "~/Library/Calendars" 1 ".*exchange$"))
+  (setq exchange-calendars nil)
+  (mapc
+     (lambda (x)
+       (setq exchange-calendars (nconc exchange-calendars (directory-files x 1 ".*calendar$"))))
+     exchange-folders)
+
   (setq local-calendars nil)
   (setq local-calendars (directory-files "~/Library/Calendars" 1 ".*calendar$"))
 
-  (setq all-calendars (append caldav-calendars local-calendars))
+  (setq all-calendars (append caldav-calendars exchange-calendars local-calendars))
 
   ;; parse each calendar's Info.plist to see if calendar is checked in iCal
   (setq all-calendars (delq 'nil (mapcar
@@ -98,10 +111,10 @@ the the Emacs diary"
   ;; for each calendar, concatenate individual events into a single ics file
   (with-temp-buffer
     (shell-command "sw_vers" (current-buffer))
-    (when (re-search-backward "10\\.[5678]" nil t)
+    (when (re-search-backward "\\(10\\.[789]\\)\\|\\(10\\.1[0-9]\\.\\)" nil t)
       (omi-concat-leopard-ics all-calendars)))
 
-  ;; move all caldav ics files to the same place as local ics files
+  ;; move all caldav and exchange ics files to the same place as local ics files
   (mapc
    (lambda (x)
      (mapc
@@ -109,7 +122,7 @@ the the Emacs diary"
         (rename-file (concat x "/" y);
                      (concat "~/Library/Calendars/" y)))
       (directory-files x nil ".*ics$")))
-   caldav-folders)
+   (append caldav-folders exchange-folders))
 
   ;; check calendar has contents and import
   (setq import-calendars (directory-files "~/Library/Calendars" 1 ".*ics$"))
@@ -232,18 +245,21 @@ date range so that Emacs calendar view doesn't grind to a halt"
   "Parse Info.plist in iCal.app calendar folder and determine
 whether Checked key is 1. If Checked key is not 1, remove
 calendar from list of calendars for import"
-  (let* ((root (xml-parse-file (car (directory-files directory 1 "Info.plist"))))
-         (plist (car root))
-         (dict (car (xml-get-children plist 'dict)))
-         (keys (cdr (xml-node-children dict)))
-         (keys (mapcar
-                (lambda (x)
-                  (cond ((listp x)
-                         x)))
-                keys))
-         (keys (delq 'nil keys)))
-    (when (equal "1" (car (cddr (lax-plist-get keys '(key nil "Checked")))))
-      directory)))
+  (let ((filename (car (directory-files directory 1 "Info.plist"))))
+    (if filename
+        (let* ((root (xml-parse-file filename))
+               (plist (car root))
+               (dict (car (xml-get-children plist 'dict)))
+               (keys (cdr (xml-node-children dict)))
+               (keys (mapcar
+                      (lambda (x)
+                        (cond ((listp x)
+                               x)))
+                      keys))
+               (keys (delq 'nil keys)))
+          (when (equal "1" (car (cddr (lax-plist-get keys '(key nil "Checked")))))
+            directory))
+      nil)))
 
 (provide 'org-mac-iCal)
 
