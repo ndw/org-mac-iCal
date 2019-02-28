@@ -32,3 +32,7 @@ did not get a reply.
 
 + The ~sw_vers~ regex has been updated so that it will accept versions of
   MacOS after 10.8.
+
++ Added ~org-mac-iCal-calendar-names~. If the names list isn’t ~nil~, then
+  calendars with those names (titles) are included, ignoring the Checked flag.
+  The Checked flag doesn’t seem to be reliable in MacOS 10.14.
