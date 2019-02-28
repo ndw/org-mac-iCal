@@ -1,0 +1,15 @@
+#+TITLE org-mac-iCal
+
+* org-mac-iCal
+
+Imports events from iCal.app to the Emacs diary.
+
+This repository is a “fork” of [[https://code.orgmode.org/bzg/org-mode/raw/master/contrib/lisp/org-mac-iCal.el][org-mac-iCal.el]] which is [[https://orgmode.org/worg/org-contrib/org-mac-iCal.html][described]] in
+the [[https://orgmode.org/worg/][Worg]]. I say “fork” because the original file doesn’t appear to be
+available in a repository anywhere.
+
+I created this repository to publish my changes and keep track of issues.
+
+The original file is copyright © 2009-2014 by Christopher Suckling. I
+attempted to reach him at the email address published in the file but
+did not get a reply.
